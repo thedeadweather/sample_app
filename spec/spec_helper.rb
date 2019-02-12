@@ -41,5 +41,8 @@ RSpec.configure do |config|
   config.order = "random"
   
   #for correct test launch we add this: 
-  config.include Capybara::DSL  
+  config.include Capybara::DSL
+  
+  #for activating named routes
+  config.include Rails.application.routes.url_helpers
 end
