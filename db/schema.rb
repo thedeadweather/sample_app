@@ -11,16 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190415131907) do
+ActiveRecord::Schema.define(version: 20190606103102) do
 
-  create_table "users", force: true do |t|
-    t.string   "name"
-    t.string   "email"
+  create_table "users", force: :cascade do |t|
+    t.string   "name",            limit: 255
+    t.string   "email",           limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "password_digest"
+    t.string   "password_digest", limit: 255
+    t.string   "remember_token"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true
+  add_index "users", ["remember_token"], name: "index_users_on_remember_token"
 
 end
