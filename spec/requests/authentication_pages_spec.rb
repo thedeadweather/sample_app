@@ -9,12 +9,15 @@ describe "Authentication" do
 
     it { should have_content('Sign in') }
     it { should have_title('Sign in') }  
+    it { should_not have_link('Profile') }
+    it { should_not have_link('Settings') }
+
 
     describe "invalid info" do
       before { click_button "Sign in" }
 
       it { should have_title('Sign in') }
-      # created at support/utilitirs.rb
+      # created at support/utilities.rb
       it { should have_error_message('Invalid') }
     end
 
@@ -54,6 +57,19 @@ describe "Authentication" do
 	  it "should render the desired protected page" do
 	    expect(page).to have_title('Edit user')
 	  end
+
+	  describe "when signing in again" do
+	    before do
+              click_link "Sign out"
+	      visit signin_path
+	      fill_in "Email", with: user.email
+	      fill_in "Password", with: user.password
+	      click_button "Sign in"
+	    end
+	    it "should render the default (profile) page" do
+	      expect(page).to have_title(user.name)
+	    end
+	  end
 	end
       end
       
@@ -75,22 +91,22 @@ describe "Authentication" do
 	end
       end
 
-    describe "as wrong user", type: :request do
-      let(:user) { FactoryGirl.create(:user) }
-      let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@example.com") }
-      before { sign_in user, no_capybara: true }
+      describe "as wrong user", type: :request do
+        let(:user) { FactoryGirl.create(:user) }
+        let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@example.com") }
+        before { sign_in user, no_capybara: true }
 
-      describe "submitting a GET request to the User#edit action" do
-        before { get edit_user_path(wrong_user) }
-	specify { expect(response.body).not_to match(full_title('Edit user')) }
-	specify { expect(response).to redirect_to(root_url) }
-      end
+        describe "submitting a GET request to the User#edit action" do
+          before { get edit_user_path(wrong_user) }
+	  specify { expect(response.body).not_to match(full_title('Edit user')) }
+	  specify { expect(response).to redirect_to(root_url) }
+        end
 
-      describe "submitting a PATCH request to the Users#update action" do
-	before { patch user_path(wrong_user) }
-	specify { expect(response).to redirect_to(root_url) }
+        describe "submitting a PATCH request to the Users#update action" do
+	  before { patch user_path(wrong_user) }
+	  specify { expect(response).to redirect_to(root_url) }
+        end
       end
-    end
     end
 
     describe "as non-admin user", type: :request do
@@ -102,6 +118,30 @@ describe "Authentication" do
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
 	specify { expect(response).to redirect_to(root_url) }
+      end
+    end
+
+    describe "as signed-in user", type: :request do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user, no_capybara: true }
+
+      describe "cannot access #new action" do
+        before { get new_user_path }
+        specify { response.should redirect_to(root_path) }
+      end
+
+      describe "cannot access #create action" do
+        before { post users_path(user) }
+	specify { response.should redirect_to(root_path) }
+      end
+    end
+
+    describe "as admin user", type: :request do
+      let(:admin) { FactoryGirl.create(:admin) }
+      before { sign_in admin, no_capybara: true }
+
+      it "should not be able to delete via #destroy action" do
+	  expect { delete user_path(admin) }.not_to change(User, :count)
       end
     end
   end
