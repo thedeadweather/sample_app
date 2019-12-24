@@ -35,9 +35,39 @@ describe "Static pages" do
           expect(page).to have_selector("li##{item.id}", text: item.content)
 	end
       end
+
+      describe "follower/following counts" do
+	let(:other_user) { FactoryGirl.create(:user) }
+	before do
+	  other_user.follow!(user)
+	  visit root_path
+	end
+
+	it { should have_link("0 following", href: following_user_path(user)) }
+	it { should have_link("1 followers", href: followers_user_path(user)) }
+      end
+
+      describe "micropost count" do
+	before { click_link "delete", match: :first }
+	it "should stay only 1 mpost" do
+	  expect(page).to have_selector("span", text: "1 micropost")
+	end
+      end
     end
   end
   
+  describe "pagination test" do
+     let(:user) { FactoryGirl.create(:user) }
+     before do
+       31.times { FactoryGirl.create(:micropost, user: user) }
+       sign_in user
+       visit root_path
+     end
+     after { user.microposts.destroy_all }
+     
+     it { should have_selector("div.pagination") }
+  end
+
   describe "Help page" do
     before { visit help_path }
     let(:heading)    { 'Help' }
