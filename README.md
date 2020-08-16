@@ -1,5 +1,6 @@
-# Перевод Ruby on Rails Tutorial: пример приложения
+Ruby on Rails Tutorial: Blog 4th edition
+======
 
-Это пример приложения для
-[*Ruby on Rails Tutorial*](http://railstutorial.org/)
-by [Майкл Хартл](http://michaelhartl.com/).
+Пример приложения-блога по гниге [*Ruby on Rails Tutorial*](http://railstutorial.org/).  
+разработан на Ruby 2.0.0 и RoR 4.2.8
+
